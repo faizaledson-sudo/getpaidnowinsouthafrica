@@ -747,8 +747,8 @@ function WalletPage() {
                 <p className="text-xs text-muted-foreground leading-relaxed">
                   A one-time refundable verification check of <strong>{formatKes(data.holdAmount)}</strong> is required to activate and link this account for automatic payouts.
                 </p>
-                <div className="rounded-lg bg-money/10 border border-money/20 p-2.5 text-xs text-money-foreground flex items-center gap-2">
-                  <BadgeCheck className="size-4 shrink-0 text-money" />
+                <div className="rounded-lg bg-blue-50 border border-blue-200 p-3 text-xs text-blue-900 font-medium flex items-center gap-2.5 shadow-sm dark:bg-blue-950/50 dark:border-blue-800 dark:text-blue-200">
+                  <BadgeCheck className="size-4 shrink-0 text-blue-600 dark:text-blue-400" />
                   <span>The <strong>{formatKes(data.holdAmount)}</strong> will be refunded immediately back to your balance upon verification.</span>
                 </div>
               </div>
