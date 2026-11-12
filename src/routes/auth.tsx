@@ -66,6 +66,27 @@ function AuthPage() {
   const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const params = new URLSearchParams(window.location.search);
+        if (params.get("age_ok") === "1") {
+          sessionStorage.setItem("age_verified", "true");
+          localStorage.setItem("age_verified", "true");
+          return;
+        }
+        const isVerified =
+          sessionStorage.getItem("age_verified") === "true" ||
+          localStorage.getItem("age_verified") === "true";
+        if (!isVerified) {
+          void navigate({ to: "/" });
+        }
+      } catch {
+        // ignore
+      }
+    }
+  }, [navigate]);
+
+  useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
       if (data.session) void navigate({ to: "/dashboard" });
     });

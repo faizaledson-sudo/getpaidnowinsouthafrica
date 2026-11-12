@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useSuspenseQuery, queryOptions } from "@tanstack/react-query";
+import { useState } from "react";
 import {
   ArrowRight,
   CheckCircle2,
@@ -17,6 +18,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { OpinionPanelLogo } from "@/components/BrandMark";
+import { AgeVerificationView } from "@/components/AgeVerificationView";
 
 const configQuery = queryOptions({
   queryKey: ["public-config"],
@@ -66,6 +68,28 @@ export const Route = createFileRoute("/")({
 
 function Landing() {
   useSuspenseQuery(configQuery);
+
+  const [isAgeVerified, setIsAgeVerified] = useState<boolean>(() => {
+    if (typeof window === "undefined") return false;
+    try {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("age_ok") === "1") {
+        sessionStorage.setItem("age_verified", "true");
+        localStorage.setItem("age_verified", "true");
+        return true;
+      }
+      return (
+        sessionStorage.getItem("age_verified") === "true" ||
+        localStorage.getItem("age_verified") === "true"
+      );
+    } catch {
+      return false;
+    }
+  });
+
+  if (!isAgeVerified) {
+    return <AgeVerificationView onVerified={() => setIsAgeVerified(true)} />;
+  }
 
   return (
     <div className="min-h-screen bg-white text-slate-900 antialiased selection:bg-blue-100 selection:text-blue-700">
