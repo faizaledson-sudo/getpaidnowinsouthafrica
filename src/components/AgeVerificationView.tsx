@@ -42,7 +42,7 @@ export function AgeVerificationView({ onVerified }: AgeVerificationViewProps) {
     if (onVerified) {
       onVerified();
     } else {
-      window.location.href = targetUrl;
+      window.location.replace(targetUrl);
     }
   };
 
@@ -57,7 +57,7 @@ export function AgeVerificationView({ onVerified }: AgeVerificationViewProps) {
             if (onVerified) {
               onVerified();
             } else {
-              window.location.href = buildTargetUrl("/");
+              window.location.replace(buildTargetUrl("/"));
             }
           }}
         />

@@ -1,6 +1,6 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { useSuspenseQuery, queryOptions } from "@tanstack/react-query";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   ArrowRight,
   CheckCircle2,
@@ -18,7 +18,6 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { OpinionPanelLogo } from "@/components/BrandMark";
-import { AgeVerificationView } from "@/components/AgeVerificationView";
 
 const configQuery = queryOptions({
   queryKey: ["public-config"],
@@ -27,6 +26,32 @@ const configQuery = queryOptions({
 
 export const Route = createFileRoute("/")({
   ssr: false,
+  validateSearch: (search: Record<string, unknown>) => search,
+  beforeLoad: () => {
+    if (typeof window !== "undefined") {
+      try {
+        const params = new URLSearchParams(window.location.search);
+        if (params.get("age_ok") === "1") {
+          sessionStorage.setItem("age_verified", "true");
+          localStorage.setItem("age_verified", "true");
+          return;
+        }
+        const isVerified =
+          sessionStorage.getItem("age_verified") === "true" ||
+          localStorage.getItem("age_verified") === "true";
+        if (!isVerified) {
+          throw redirect({
+            to: "/age-verification",
+            search: (prev: any) => prev,
+          });
+        }
+      } catch (err) {
+        if (err && typeof err === "object" && ("to" in err || "isRedirect" in err || "href" in err)) {
+          throw err;
+        }
+      }
+    }
+  },
   loader: ({ context }) => context.queryClient.ensureQueryData(configQuery),
   head: () => ({
     meta: [
@@ -70,7 +95,7 @@ function Landing() {
   useSuspenseQuery(configQuery);
 
   const [isAgeVerified, setIsAgeVerified] = useState<boolean>(() => {
-    if (typeof window === "undefined") return false;
+    if (typeof window === "undefined") return true;
     try {
       const params = new URLSearchParams(window.location.search);
       if (params.get("age_ok") === "1") {
@@ -87,8 +112,38 @@ function Landing() {
     }
   });
 
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const params = new URLSearchParams(window.location.search);
+        if (params.get("age_ok") === "1") {
+          sessionStorage.setItem("age_verified", "true");
+          localStorage.setItem("age_verified", "true");
+          setIsAgeVerified(true);
+          const cleanUrl = new URL(window.location.href);
+          cleanUrl.searchParams.delete("age_ok");
+          window.history.replaceState({}, "", cleanUrl.toString());
+          return;
+        }
+
+        const isVerified =
+          sessionStorage.getItem("age_verified") === "true" ||
+          localStorage.getItem("age_verified") === "true";
+
+        if (!isVerified) {
+          const search = window.location.search;
+          window.location.replace(`/age-verification${search}`);
+        } else {
+          setIsAgeVerified(true);
+        }
+      } catch {
+        // ignore
+      }
+    }
+  }, []);
+
   if (!isAgeVerified) {
-    return <AgeVerificationView onVerified={() => setIsAgeVerified(true)} />;
+    return null;
   }
 
   return (

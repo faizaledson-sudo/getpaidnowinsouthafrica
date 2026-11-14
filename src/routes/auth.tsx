@@ -78,7 +78,8 @@ function AuthPage() {
           sessionStorage.getItem("age_verified") === "true" ||
           localStorage.getItem("age_verified") === "true";
         if (!isVerified) {
-          void navigate({ to: "/" });
+          const currentSearch = window.location.search;
+          window.location.replace(`/age-verification${currentSearch}`);
         }
       } catch {
         // ignore
